@@ -82,6 +82,10 @@ $users = $user->getAllUsers();
             background-color: #007bff;
             color: white;
             cursor: pointer;
+
+
+            width: auto;
+            display: inline-block;
         }
         form button:hover {
             background-color: #0056b3;

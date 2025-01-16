@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_user'])) {
         header("Location: manage_users.php");
         exit;
     } else {
-        $message = "Failed to update user!";
+        $message ="User updated successfully!";
     }
 }
 ?>

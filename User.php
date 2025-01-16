@@ -19,7 +19,14 @@ class User {
         $stmt->execute([$name, $email, $hashedPassword, $role]);
     }
 
-    public function updateUser($user_id, $name, $email, $role) {
+    public function getUserById($user_id) {
+        $stmt = $this->conn->prepare("SELECT * FROM users WHERE user_id = ?");
+        $stmt->execute([$user_id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    
+
+    public function updateuser($user_id, $name, $email, $role) {
         $stmt = $this->conn->prepare("UPDATE users SET name = ?, email = ?, role = ? WHERE user_id = ?");
         $stmt->execute([$name, $email, $role, $user_id]);
     }

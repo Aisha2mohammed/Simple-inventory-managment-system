@@ -163,7 +163,7 @@ $users = $user->getAllUsers();
                     <td><?= htmlspecialchars($user['email']) ?></td>
                     <td><?= htmlspecialchars($user['role']) ?></td>
                     <td>
-                        <form method="POST" style="display:inline;">
+                        <form method="POST"  action="update_user.php"  style="display:inline;">
                             <input type="hidden" name="action" value="update">
                             <input type="hidden" name="user_id" value="<?= $user['user_id'] ?>">
                             <button type="submit">Update</button>

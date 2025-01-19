@@ -1,101 +1,5 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'store_manager') {
-    header("Location: login.html");
-    exit;
-}
-
-require_once 'includes/db_connect.php';
-
-class Inventory {
-    private $conn;
-
-    public function __construct($conn) {
-        $this->conn = $conn;
-    }
-
-    public function getAllItems() {
-        $stmt = $this->conn->query("SELECT * FROM inventory_items");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-}
-
-// Create instance of Inventory
-$inventory = new Inventory($conn);
-$items = $inventory->getAllItems();
-?>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manage Inventory</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 50px auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        table, th, td {
-            border: 1px solid #ccc;
-        }
-        th {
-            background-color: #007bff;
-            color: white;
-            padding: 10px;
-        }
-        td {
-            padding: 10px;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Manage Inventory</h1>
-        <table>
-            <thead>
-                <tr>
-                    <th>Item ID</th>
-                    <th>Category</th>
-                    <th>Subcategory</th>
-                    <th>Material</th>
-                    <th>Condition</th>
-                    <th>Quantity</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($items as $item): ?>
-                    <tr>
-                        <td><?= htmlspecialchars($item['item_id']) ?></td>
-                        <td><?= htmlspecialchars($item['category']) ?></td>
-                        <td><?= htmlspecialchars($item['subcategory']) ?></td>
-                        <td><?= htmlspecialchars($item['material']) ?></td>
-                        <td><?= htmlspecialchars($item['condition']) ?></td>
-                        <td><?= htmlspecialchars($item['quantity']) ?></td>
-                        <td><?= htmlspecialchars($item['status']) ?></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-    </div>
-</body>
-</html>
-<?php
-session_start();
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'store_keeper') {
     header("Location: login.html");
     exit;
@@ -138,7 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Fetch all items
 $items = $inventory->getAllItems();
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -208,11 +111,8 @@ $items = $inventory->getAllItems();
     <div class="container">
         <h1>Manage Items</h1>
 
-        <?php if (!empty($message)): ?>
-            <div class="message"><?= htmlspecialchars($message) ?></div>
-        <?php endif; ?>
-
-        <h2>Add Item</h2>
+        <!-- Add Item Form -->
+        <h2>Add/Update Item</h2>
         <form method="POST">
             <input type="hidden" name="action" value="add">
 
@@ -227,10 +127,14 @@ $items = $inventory->getAllItems();
             </select>
 
             <label for="subcategory">Subcategory:</label>
-            <select id="subcategory" name="subcategory" required></select>
+            <select id="subcategory" name="subcategory" required>
+                <!-- Dynamic options -->
+            </select>
 
             <label for="material">Material:</label>
-            <select id="material" name="material" required></select>
+            <select id="material" name="material" required>
+                <!-- Dynamic options -->
+            </select>
 
             <label for="condition">Condition:</label>
             <select name="condition" required>
@@ -247,7 +151,7 @@ $items = $inventory->getAllItems();
                 <option value="borrowed">Borrowed</option>
             </select>
 
-            <button type="submit">Add Item</button>
+            <button type="submit">Add/Update Item</button>
         </form>
 
         <h2>Existing Items</h2>
@@ -275,7 +179,8 @@ $items = $inventory->getAllItems();
                         <td><?= htmlspecialchars($item['quantity']) ?></td>
                         <td><?= htmlspecialchars($item['status']) ?></td>
                         <td>
-                            <form method="GET" action="update_item.php" style="display:inline;">
+                            <form method="POST" style="display:inline;">
+                                <input type="hidden" name="action" value="update">
                                 <input type="hidden" name="item_id" value="<?= $item['item_id'] ?>">
                                 <button type="submit">Update</button>
                             </form>
@@ -290,5 +195,43 @@ $items = $inventory->getAllItems();
             </tbody>
         </table>
     </div>
+
+    <script>
+        const subcategoryMap = {
+            "renewable": ["Furniture", "Electronics", "Solar Panels", "Wind Turbines"],
+            "non-renewable": ["Metals", "Chemicals", "Plastics", "Fossil Fuels"]
+        };
+
+        const materialMap = {
+            "Furniture": ["Chair", "Table", "Cupboard", "Sofa", "Bookshelf"],
+            "Electronics": ["Desktop", "Laptop", "Monitor", "Keyboard", "Mouse"],
+            "Solar Panels": ["Monocrystalline", "Polycrystalline", "Thin Film"],
+            "Wind Turbines": ["Small Turbine", "Medium Turbine", "Large Turbine"],
+            "Metals": ["Iron", "Copper", "Aluminum", "Steel", "Brass"],
+            "Chemicals": ["Acid", "Base", "Solvent", "Oxidizer", "Salt"],
+            "Plastics": ["Bottle", "Container", "Pipe", "Sheet", "Bag"],
+            "Fossil Fuels": ["Coal", "Oil", "Natural Gas", "LPG"]
+        };
+
+        const categoryDropdown = document.getElementById("category");
+        const subcategoryDropdown = document.getElementById("subcategory");
+        const materialDropdown = document.getElementById("material");
+
+        categoryDropdown.addEventListener("change", function () {
+            const selectedCategory = this.value;
+            subcategoryDropdown.innerHTML = `<option value="" disabled selected>Select Subcategory</option>`;
+            (subcategoryMap[selectedCategory] || []).forEach(sub => {
+                subcategoryDropdown.innerHTML += `<option value="${sub}">${sub}</option>`;
+            });
+        });
+
+        subcategoryDropdown.addEventListener("change", function () {
+            const selectedSubcategory = this.value;
+            materialDropdown.innerHTML = `<option value="" disabled selected>Select Material</option>`;
+            (materialMap[selectedSubcategory] || []).forEach(mat => {
+                materialDropdown.innerHTML += `<option value="${mat}">${mat}</option>`;
+            });
+        });
+    </script>
 </body>
 </html>

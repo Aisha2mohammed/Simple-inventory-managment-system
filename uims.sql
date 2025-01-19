@@ -1,9 +1,9 @@
-- phpMyAdmin SQL Dump
+
 -- version 5.2.1
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Jan 19, 2025 at 12:31 PM
+-- Generation Time: Jan 19, 2025 at 04:02 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -37,6 +37,16 @@ CREATE TABLE `borrow_requests` (
   `status` enum('pending','approved','returned') DEFAULT 'pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `borrow_requests`
+--
+
+INSERT INTO `borrow_requests` (`request_id`, `user_id`, `item_id`, `quantity`, `borrow_date`, `return_date`, `status`) VALUES
+(1, 7, '2', 5, '2025-01-19 13:06:37', NULL, 'pending'),
+(2, 7, '2', 3, '2025-01-19 13:07:25', NULL, 'pending'),
+(3, 7, '5', 2, '2025-01-19 13:51:39', NULL, 'pending'),
+(4, 7, '4', 2, '2025-01-19 14:33:50', NULL, 'pending');
+
 -- --------------------------------------------------------
 
 --
@@ -60,9 +70,10 @@ CREATE TABLE `inventory_items` (
 
 INSERT INTO `inventory_items` (`item_id`, `category`, `subcategory`, `material`, `condition`, `quantity`, `status`, `created_at`) VALUES
 ('1', 'renewable', 'Electronics', 'Desktop', 'new', 6, 'available', '2025-01-19 06:16:57'),
-('2', 'renewable', 'Furniture', 'Chair', 'new', 15, 'available', '2025-01-19 06:33:39'),
+('2', 'renewable', 'Furniture', 'Chair', 'new', 7, 'available', '2025-01-19 06:33:39'),
 ('3', 'renewable', 'Furniture', 'Table', 'new', 20, 'available', '2025-01-19 06:36:52'),
-('4', 'non-renewable', 'Metals', 'Aluminum', 'new', 10, 'available', '2025-01-19 07:13:00');
+('4', 'non-renewable', 'Metals', 'Aluminum', 'new', 8, 'available', '2025-01-19 07:13:00'),
+('5', 'renewable', 'Solar Panels', 'Polycrystalline', 'new', 2, 'available', '2025-01-19 13:48:24');
 
 -- --------------------------------------------------------
 
@@ -125,7 +136,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `borrow_requests`
 --
 ALTER TABLE `borrow_requests`
-  MODIFY `request_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `request_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `users`

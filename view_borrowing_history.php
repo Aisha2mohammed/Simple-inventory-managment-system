@@ -1,11 +1,6 @@
 <?php
 session_start();
 
-
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 // Session Timeout
 if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 900)) {
     session_unset();
@@ -27,8 +22,6 @@ require_once 'InventoryActions.php';
 $inventoryActions = new InventoryActions($conn);
 $borrowingHistory = $inventoryActions->getBorrowingHistory($_SESSION['user_id']);
 ?>
-<!-- HTML Code Below -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -68,13 +61,24 @@ $borrowingHistory = $inventoryActions->getBorrowingHistory($_SESSION['user_id'])
             background-color: #007bff;
             color: white;
         }
+        .delete-button {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .delete-button:hover {
+            background-color: #c82333;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Borrowing History</h1>
         <?php if (!empty($borrowingHistory)): ?>
-            <table>
+            <table id="borrowingHistoryTable">
                 <thead>
                     <tr>
                         <th>Item ID</th>
@@ -82,21 +86,24 @@ $borrowingHistory = $inventoryActions->getBorrowingHistory($_SESSION['user_id'])
                         <th>Quantity</th>
                         <th>Borrow Date</th>
                         <th>Return Date</th>
-                        <th>Return Status</th>
-
+                        <th>Status</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($borrowingHistory as $history): ?>
-                        <tr>
+                    <?php foreach ($borrowingHistory as $index => $history): ?>
+                        <tr id="row-<?= $index ?>">
                             <td><?= htmlspecialchars($history['item_id']) ?></td>
                             <td><?= htmlspecialchars($history['material']) ?></td>
                             <td><?= htmlspecialchars($history['quantity']) ?></td>
                             <td><?= htmlspecialchars($history['borrow_date']) ?></td>
                             <td><?= htmlspecialchars($history['return_date']) ?></td>
                             <td>
-                <?= strtotime($history['return_date']) < time() ? 'Returned' : 'Not Returned' ?>
-            </td>
+                                <?= strtotime($history['return_date']) < time() ? 'Returned' : 'Not Returned' ?>
+                            </td>
+                            <td>
+                                <button class="delete-button" onclick="deleteRow('row-<?= $index ?>')">Delete</button>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -105,6 +112,15 @@ $borrowingHistory = $inventoryActions->getBorrowingHistory($_SESSION['user_id'])
             <p>No borrowing history found.</p>
         <?php endif; ?>
     </div>
+
+    <script>
+        // JavaScript function to delete a row
+        function deleteRow(rowId) {
+            const row = document.getElementById(rowId);
+            if (row) {
+                row.remove(); // Remove the row from the table
+            }
+        }
+    </script>
 </body>
 </html>
-

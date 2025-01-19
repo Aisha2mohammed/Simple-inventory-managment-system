@@ -74,7 +74,6 @@ class InventoryActions {
 
 
     //borrow
-
     public function borrowItem($item_id, $user_id, $quantity) {
         try {
             // Begin a transaction
@@ -97,41 +96,24 @@ class InventoryActions {
             $stmt = $this->conn->prepare("UPDATE inventory_items SET quantity = quantity - ? WHERE item_id = ?");
             $stmt->execute([$quantity, $item_id]);
     
-            // Insert into borrow_requests table
+            // Insert the borrow request
             $stmt = $this->conn->prepare("
-            INSERT INTO borrow_requests (user_id, item_id, quantity, borrow_date, return_date)
-            VALUES (?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 6 MONTH))
-        ");
-        return $stmt->execute([$data['user_id'], $data['item_id'], $data['quantity']]);
+                INSERT INTO borrow_requests (user_id, item_id, quantity, borrow_date, return_date)
+                VALUES (?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 6 MONTH))
+            ");
+            $stmt->execute([$user_id, $item_id, $quantity]);
     
-           
-           
-            // $stmt = $this->conn->prepare("INSERT INTO borrow_requests (item_id, user_id, quantity, borrow_date) VALUES (?, ?, ?, NOW())");
-            // $stmt->execute([$item_id, $user_id, $quantity]);
-    
-            // // Commit the transaction
-            // $this->conn->commit();
-            // return true;
+            // Commit the transaction
+            $this->conn->commit();
+            return true;
         } catch (Exception $e) {
             // Rollback the transaction on failure
             $this->conn->rollBack();
+            error_log($e->getMessage());
             return false;
         }
     }
-
-    // public function getBorrowingHistory($user_id) {
-    //     $sql = "SELECT br.item_id, i.material, br.quantity, br.borrow_date, br.return_date 
-    //             FROM borrow_requests br 
-    //             JOIN inventory_items i ON br.item_id = i.item_id 
-    //             WHERE br.user_id = ? 
-    //             ORDER BY br.borrow_date DESC";
-    
-    //     $stmt = $this->conn->prepare($sql);
-    //     $stmt->execute([$user_id]);
-    //     return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    // }
     
     
 }
 ?>
-

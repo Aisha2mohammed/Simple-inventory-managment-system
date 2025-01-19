@@ -1,3 +1,35 @@
+<?php
+session_start();
+
+// Session Timeout
+if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 900)) {
+    session_unset();
+    session_destroy();
+    header("Location: login.html");
+    exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time(); // Update last activity time
+
+// Ensure user is authenticated
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.html");
+    exit;
+}
+
+require_once 'includes/db_connect.php';
+require_once 'InventoryActions.php';
+
+$inventoryActions = new InventoryActions($conn);
+$searchResults = [];
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $query = trim($_POST['query']);
+    $searchResults = $inventoryActions->searchItems($query);
+}
+?>
+<!-- HTML Code Below -->
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -89,23 +121,29 @@
 
             $items = $inventoryActions->searchItems($search_term, $category, $subcategory);
 
-            if (!empty($items)) {
-                echo "<table><thead><tr><th>Item ID</th><th>Category</th><th>Subcategory</th><th>Material</th><th>Condition</th><th>Quantity</th><th>Status</th></tr></thead><tbody>";
-                foreach ($items as $item) {
-                    echo "<tr>
-                        <td>{$item['item_id']}</td>
-                        <td>{$item['category']}</td>
-                        <td>{$item['subcategory']}</td>
-                        <td>{$item['material']}</td>
-                        <td>{$item['condition']}</td>
-                        <td>{$item['quantity']}</td>
-                        <td>{$item['status']}</td>
-                    </tr>";
-                }
-                echo "</tbody></table>";
-            } else {
-                echo "<p>No items found.</p>";
-            }
+         // ... (Above code remains the same)
+
+if (!empty($items)) {
+    echo "<table><thead><tr><th>Item ID</th><th>Category</th><th>Subcategory</th><th>Material</th><th>Condition</th><th>Quantity</th><th>Status</th><th>Action</th></tr></thead><tbody>";
+    foreach ($items as $item) {
+        echo "<tr>
+            <td>{$item['item_id']}</td>
+            <td>{$item['category']}</td>
+            <td>{$item['subcategory']}</td>
+            <td>{$item['material']}</td>
+            <td>{$item['condition']}</td>
+            <td>{$item['quantity']}</td>
+            <td>{$item['status']}</td>
+            <td>
+                <a href='borrow_item.php?item_id={$item['item_id']}' style='color: #007bff; text-decoration: none;'>Borrow</a>
+            </td>
+        </tr>";
+    }
+    echo "</tbody></table>";
+} else {
+    echo "<p>No items found.</p>";
+}
+
         }
         ?>
     </div>

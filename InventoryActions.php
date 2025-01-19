@@ -98,12 +98,20 @@ class InventoryActions {
             $stmt->execute([$quantity, $item_id]);
     
             // Insert into borrow_requests table
-            $stmt = $this->conn->prepare("INSERT INTO borrow_requests (item_id, user_id, quantity, borrow_date) VALUES (?, ?, ?, NOW())");
-            $stmt->execute([$item_id, $user_id, $quantity]);
+            $stmt = $this->conn->prepare("
+            INSERT INTO borrow_requests (user_id, item_id, quantity, borrow_date, return_date)
+            VALUES (?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 6 MONTH))
+        ");
+        return $stmt->execute([$data['user_id'], $data['item_id'], $data['quantity']]);
     
-            // Commit the transaction
-            $this->conn->commit();
-            return true;
+           
+           
+            // $stmt = $this->conn->prepare("INSERT INTO borrow_requests (item_id, user_id, quantity, borrow_date) VALUES (?, ?, ?, NOW())");
+            // $stmt->execute([$item_id, $user_id, $quantity]);
+    
+            // // Commit the transaction
+            // $this->conn->commit();
+            // return true;
         } catch (Exception $e) {
             // Rollback the transaction on failure
             $this->conn->rollBack();

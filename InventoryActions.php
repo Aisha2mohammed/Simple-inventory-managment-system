@@ -114,6 +114,29 @@ class InventoryActions {
         }
     }
     
+    public function generateReport($startDate = null, $endDate = null) {
+        $query = "SELECT br.request_id, br.user_id, br.item_id, br.quantity, br.borrow_date, br.return_date, br.status,
+                  i.category, i.subcategory, i.material
+                  FROM borrow_requests br
+                  JOIN inventory_items i ON br.item_id = i.item_id
+                  WHERE 1=1";
+        $params = [];
     
+        if ($startDate) {
+            $query .= " AND br.borrow_date >= ?";
+            $params[] = $startDate;
+        }
+    
+        if ($endDate) {
+            $query .= " AND br.borrow_date <= ?";
+            $params[] = $endDate;
+        }
+    
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+      
 }
 ?>
+

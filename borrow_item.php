@@ -29,6 +29,7 @@ if (!isset($_GET['item_id'])) {
 $item_id = $_GET['item_id'];
 $item = $inventoryActions->getItemById($item_id);
 
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $quantity = intval($_POST['quantity']);
     $user_id = $_SESSION['user_id'];
@@ -37,9 +38,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($result) {
         echo "<script>alert('Item borrowed successfully!'); window.location.href='search_item.php';</script>";
     } else {
-        echo "<script>alert('Failed to borrow the item.'); window.location.href='borrow_item.php?item_id=$item_id';</script>";
+        echo "<script>alert('Failed to borrow the item. Check quantity or try again.'); window.location.href='borrow_item.php?item_id=$item_id';</script>";
     }
 }
+
 ?>
 <!-- HTML Code Below -->
 

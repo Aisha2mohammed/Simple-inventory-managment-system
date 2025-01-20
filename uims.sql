@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Jan 19, 2025 at 04:02 PM
+-- Generation Time: Jan 20, 2025 at 06:38 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -33,8 +33,8 @@ CREATE TABLE `borrow_requests` (
   `item_id` varchar(255) NOT NULL,
   `quantity` int(11) NOT NULL,
   `borrow_date` timestamp NOT NULL DEFAULT current_timestamp(),
-  `return_date` timestamp NULL DEFAULT NULL,
-  `status` enum('pending','approved','returned') DEFAULT 'pending'
+  `return_date` timestamp NOT NULL DEFAULT (current_timestamp() + interval 6 month),
+  `status` enum('pending','approved','rejected','returned') DEFAULT 'pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -42,10 +42,11 @@ CREATE TABLE `borrow_requests` (
 --
 
 INSERT INTO `borrow_requests` (`request_id`, `user_id`, `item_id`, `quantity`, `borrow_date`, `return_date`, `status`) VALUES
-(1, 7, '2', 5, '2025-01-19 13:06:37', NULL, 'pending'),
-(2, 7, '2', 3, '2025-01-19 13:07:25', NULL, 'pending'),
-(3, 7, '5', 2, '2025-01-19 13:51:39', NULL, 'pending'),
-(4, 7, '4', 2, '2025-01-19 14:33:50', NULL, 'pending');
+(5, 7, '2', 5, '2025-01-19 20:15:37', '2025-07-19 20:15:37', 'approved'),
+(6, 7, '1', 4, '2025-01-19 21:12:52', '2025-07-19 21:12:52', 'approved'),
+(7, 7, '3', 6, '2025-01-19 21:19:34', '2025-07-19 21:19:34', 'rejected'),
+(8, 7, '3', 3, '2025-01-19 21:33:51', '2025-07-19 21:33:51', 'pending'),
+(9, 7, '4', 5, '2025-01-19 21:47:52', '2025-07-19 21:47:52', 'pending');
 
 -- --------------------------------------------------------
 
@@ -69,11 +70,12 @@ CREATE TABLE `inventory_items` (
 --
 
 INSERT INTO `inventory_items` (`item_id`, `category`, `subcategory`, `material`, `condition`, `quantity`, `status`, `created_at`) VALUES
-('1', 'renewable', 'Electronics', 'Desktop', 'new', 6, 'available', '2025-01-19 06:16:57'),
-('2', 'renewable', 'Furniture', 'Chair', 'new', 7, 'available', '2025-01-19 06:33:39'),
-('3', 'renewable', 'Furniture', 'Table', 'new', 20, 'available', '2025-01-19 06:36:52'),
-('4', 'non-renewable', 'Metals', 'Aluminum', 'new', 8, 'available', '2025-01-19 07:13:00'),
-('5', 'renewable', 'Solar Panels', 'Polycrystalline', 'new', 2, 'available', '2025-01-19 13:48:24');
+('1', 'renewable', 'Electronics', 'Desktop', 'new', 2, 'available', '2025-01-19 06:16:57'),
+('2', 'renewable', 'Furniture', 'Chair', 'new', 2, 'available', '2025-01-19 06:33:39'),
+('3', 'renewable', 'Furniture', 'Table', 'new', 11, 'available', '2025-01-19 06:36:52'),
+('4', 'non-renewable', 'Metals', 'Aluminum', 'new', 3, 'available', '2025-01-19 07:13:00'),
+('5', 'renewable', 'Solar Panels', 'Polycrystalline', 'new', 2, 'available', '2025-01-19 13:48:24'),
+('6', 'non-renewable', 'Chemicals', 'Solvent', 'new', 7, 'available', '2025-01-19 22:04:49');
 
 -- --------------------------------------------------------
 
@@ -136,7 +138,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `borrow_requests`
 --
 ALTER TABLE `borrow_requests`
-  MODIFY `request_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `request_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `users`

@@ -136,7 +136,39 @@ class InventoryActions {
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-      
+     
+     // Approve a borrow request
+public function approveRequest($request_id) {
+    $stmt = $this->conn->prepare("UPDATE borrow_requests SET status = 'approved' WHERE request_id = ?");
+    return $stmt->execute([$request_id]);
+}
+
+// Reject a borrow request
+public function rejectRequest($request_id) {
+    try {
+        $stmt = $this->conn->prepare("UPDATE borrow_requests SET status = 'rejected' WHERE request_id = ?");
+        $stmt->execute([$request_id]);
+        return true;
+    } catch (PDOException $e) {
+        // Log or handle the error for debugging
+        error_log("Error rejecting request: " . $e->getMessage());
+        return false;
+    }
+}
+
+// Get all pending borrow requests
+public function getPendingRequests() {
+    $stmt = $this->conn->query("
+        SELECT br.request_id, br.user_id, br.item_id, br.quantity, br.borrow_date, i.material, i.category, i.subcategory
+        FROM borrow_requests br
+        JOIN inventory_items i ON br.item_id = i.item_id
+        WHERE br.status = 'pending'
+    ");
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+
+
 }
 ?>
 

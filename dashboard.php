@@ -1,13 +1,9 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header("Location: secure_login_form.html");
+    header("Location: login.html");
     exit;
 }
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 
 $name = htmlspecialchars($_SESSION['name']);
 $role = htmlspecialchars($_SESSION['role']);
@@ -18,15 +14,14 @@ $role_actions = [
     ],
     'store_manager' => [
         'Generate Reports' => 'generate_reports.php',
-        'Oversee Inventory' => 'manage_items.php',
+        'Approve Borrow Requests' => 'approve_requests.php',
         'Search Item' => 'search_item.php',
         'Borrow Item' => 'borrow_item.php',
-        'View Borrowing History' => 'view_borrowing_history.php',
+        'View Borrowing 
+        History' => 'view_borrowing_history.php',
     ],
     'store_keeper' => [
-        'Add Item' => 'add_item.php',
-        'Update Item' => 'update_item.php',
-        'Delete Item' => 'delete_item.php',
+        'Manage Items' => 'manage_items.php',
         'Search Item' => 'search_item.php',
         'Borrow Item' => 'borrow_item.php',
         'View Borrowing History' => 'view_borrowing_history.php',

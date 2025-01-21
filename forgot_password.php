@@ -25,16 +25,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $update_stmt = $conn->prepare("UPDATE users SET password = ? WHERE email = ?");
                     $update_stmt->execute([$hashed_password, $email]);
 
-                    $message = "Password reset successfully! <a href='login.html'>Go to Login</a>";
+                    $message = "<div class='message success'>Password reset successfully! <a href='login.html'>Go to Login</a></div>";
                 } else {
-                    $message = "Error: Passwords do not match.";
+                    $message = "<div class='message error'>Error: Passwords do not match.</div>";
                 }
             }
         } else {
-            $message = "Error: Email not found.";
+            $message = "<div class='message error'>Error: Email not found.</div>";
         }
     } catch (PDOException $e) {
-        $message = "Error: " . $e->getMessage();
+        $message = "<div class='message error'>Error: " . htmlspecialchars($e->getMessage()) . "</div>";
     }
 }
 ?>
@@ -91,11 +91,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="container">
         <h2>Reset Your Password</h2>
 
-        <?php if ($message): ?>
-            <div class="message <?= strpos($message, 'Error') !== false ? 'error' : 'success' ?>">
-                <?= htmlspecialchars($message) ?>
-            </div>
-        <?php endif; ?>
+        <?= $message ?>
 
         <form method="POST">
             <label for="email">Enter your email:</label>
@@ -114,4 +110,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </body>
 </html>
-

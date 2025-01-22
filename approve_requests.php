@@ -5,17 +5,16 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-echo "Approve Requests file is loaded!";
-
-
+// Session Timeout
 if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 900)) {
     session_unset();
     session_destroy();
     header("Location: login.html");
     exit;
 }
-$_SESSION['LAST_ACTIVITY'] = time();
+$_SESSION['LAST_ACTIVITY'] = time(); // Update last activity time
 
+// Ensure user is authenticated and has the correct role
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'store_manager') {
     header("Location: login.html");
     exit;
@@ -25,13 +24,15 @@ require_once 'includes/db_connect.php';
 require_once 'InventoryActions.php';
 
 $inventoryActions = new InventoryActions($conn);
+$message = "";
 
+// Handle Approve/Reject Actions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'];
     $request_id = $_POST['request_id'];
 
     if ($action === 'approve') {
-        $inventoryActions->approveRequest($request_id);
+        $inventoryActions->approveRequestManager($request_id);
         $message = "Request approved successfully.";
     } elseif ($action === 'reject') {
         $inventoryActions->rejectRequest($request_id);
@@ -39,8 +40,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-$pendingRequests = $inventoryActions->getPendingRequests();
+// Fetch pending requests for the store manager
+$pendingRequests = $inventoryActions->getManagerPendingRequests();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -62,6 +65,10 @@ $pendingRequests = $inventoryActions->getPendingRequests();
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
         }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -75,31 +82,32 @@ $pendingRequests = $inventoryActions->getPendingRequests();
             background-color: #007bff;
             color: white;
         }
-        form {
-            display: inline;
+        .message {
+            color: green;
+            margin-bottom: 20px;
         }
-        button {
+        .btn {
             padding: 10px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
         .approve-btn {
-            background-color: #8cf3a494;
-            color: #071a05;
+            background-color: #28a745;
+            color: white;
         }
         .reject-btn {
-            background-color: #f164716b;
-            color: #1a0101;
-            margin-top:10px;
+            background-color: #dc3545;
+            color: white;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Approve Borrow Requests</h1>
+
         <?php if (!empty($message)): ?>
-            <p style="color: green;"><?= htmlspecialchars($message) ?></p>
+            <p class="message"><?= htmlspecialchars($message) ?></p>
         <?php endif; ?>
 
         <?php if (!empty($pendingRequests)): ?>
@@ -129,10 +137,10 @@ $pendingRequests = $inventoryActions->getPendingRequests();
                             <td><?= htmlspecialchars($request['quantity']) ?></td>
                             <td><?= htmlspecialchars($request['borrow_date']) ?></td>
                             <td>
-                            <form method="POST" action="approve_requests.php">
-                            <input type="hidden" name="request_id" value="<?= $request['request_id'] ?>">
-                                    <button type="submit" name="action" value="approve" class="approve-btn">Approve</button>
-                                    <button type="submit" name="action" value="reject" class="reject-btn">Reject</button>
+                                <form method="POST" style="display:inline;">
+                                    <input type="hidden" name="request_id" value="<?= $request['request_id'] ?>">
+                                    <button type="submit" name="action" value="approve" class="btn approve-btn">Approve</button>
+                                    <button type="submit" name="action" value="reject" class="btn reject-btn">Reject</button>
                                 </form>
                             </td>
                         </tr>

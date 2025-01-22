@@ -144,16 +144,6 @@ class InventoryActions {
     }
     
 
-
-    // public function approveRequest($request_id) {
-    //     $stmt = $this->conn->prepare("
-    //         UPDATE borrow_requests 
-    //         SET status = 'pending_manager' 
-    //         WHERE request_id = ?
-    //     ");
-    //     return $stmt->execute([$request_id]);
-    // }
-    
 // Reject a borrow request
 public function rejectRequest($request_id) {
     try {
@@ -222,18 +212,6 @@ public function getManagerPendingRequests() {
     ");
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-
-
-// public function getManagerPendingRequests() {
-//     $stmt = $this->conn->query("
-//         SELECT br.request_id, br.user_id, br.item_id, br.quantity, br.borrow_date, 
-//                i.material, i.category, i.subcategory
-//         FROM borrow_requests br
-//         JOIN inventory_items i ON br.item_id = i.item_id
-//         WHERE br.status = 'pending_manager'
-//     ");
-//     return $stmt->fetchAll(PDO::FETCH_ASSOC);
-// }
 
 
 

@@ -25,12 +25,11 @@ class User {
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
     
-
-    public function updateuser($user_id, $name, $email, $role) {
+    public function updateUser($user_id, $name, $email, $role) {
         $stmt = $this->conn->prepare("UPDATE users SET name = ?, email = ?, role = ? WHERE user_id = ?");
         $stmt->execute([$name, $email, $role, $user_id]);
     }
-
+    
     public function deleteUser($user_id) {
         $stmt = $this->conn->prepare("DELETE FROM users WHERE user_id = ?");
         $stmt->execute([$user_id]);

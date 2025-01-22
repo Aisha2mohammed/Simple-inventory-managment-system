@@ -63,6 +63,8 @@ $users = $user->getAllUsers();
             text-align: center;
             color: #333;
         }
+
+
         form {
             margin: 20px 0;
             padding: 20px;
@@ -82,7 +84,6 @@ $users = $user->getAllUsers();
             background-color: #007bff;
             color: white;
             cursor: pointer;
-
 
             width: auto;
             display: inline-block;
@@ -163,7 +164,7 @@ $users = $user->getAllUsers();
                     <td><?= htmlspecialchars($user['email']) ?></td>
                     <td><?= htmlspecialchars($user['role']) ?></td>
                     <td>
-                        <form method="POST"  action="update_user.php"  style="display:inline;">
+                        <form method="POST" action="update_user.php" style="display:inline;">
                             <input type="hidden" name="action" value="update">
                             <input type="hidden" name="user_id" value="<?= $user['user_id'] ?>">
                             <button type="submit">Update</button>

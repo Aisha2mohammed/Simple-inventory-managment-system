@@ -17,8 +17,7 @@ $role_actions = [
         'Approve Borrow Requests' => 'approve_requests.php',
         'Search Item' => 'search_item.php',
         'Borrow Item' => 'borrow_item.php',
-        'View Borrowing 
-        History' => 'view_borrowing_history.php',
+        'View Borrowing History' => 'view_borrowing_history.php',
     ],
     'store_keeper' => [
         'Manage Items' => 'manage_items.php',

@@ -8,11 +8,9 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
 require_once 'User.php';
 require_once 'includes/db_connect.php';
 
-// Initialize the User class
 $user = new User($conn);
 
-// Retrieve user ID from POST request
-$user_id = $_POST['user_id'] ?? null;
+$user_id = $_POST['user_id'] ?? $_GET['user_id'] ?? null;
 
 if (!$user_id) {
     $_SESSION['message'] = "No user selected for update!";
@@ -20,8 +18,9 @@ if (!$user_id) {
     exit;
 }
 
-// Fetch user details
 $userDetails = $user->getUserById($user_id);
+
+$message = "";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_user'])) {
     $name = $_POST['name'];
@@ -33,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_user'])) {
         header("Location: manage_users.php");
         exit;
     } else {
-        $message ="User updated successfully!";
+        $message = "User updated successfully!";
     }
 }
 ?>
@@ -63,9 +62,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_user'])) {
             text-align: center;
             color: #333;
         }
-        form {
-            margin-top: 20px;
-        }
         form input, form select, form button {
             display: block;
             width: 100%;
@@ -93,15 +89,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_user'])) {
             border: 1px solid #c3e6cb;
             border-radius: 5px;
         }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Update User</h1>
 
-        <!-- Display error/success messages -->
         <?php if (!empty($message)): ?>
-            <div class="message"><?= htmlspecialchars($message) ?></div>
+            <div class="message <?= strpos($message, 'Failed') !== false ? 'error' : '' ?>">
+                <?= htmlspecialchars($message) ?>
+            </div>
         <?php endif; ?>
 
         <form method="POST">
@@ -131,3 +133,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_user'])) {
     </div>
 </body>
 </html>
+
+
+

@@ -15,9 +15,8 @@ class InventoryActions {
     }
 
 
-
     public function searchItems($search_term = null, $category = null, $subcategory = null) {
-        $query = "SELECT * FROM inventory_items WHERE 1=1";
+        $query = "SELECT * FROM inventory_items WHERE quantity > 0";
         $params = [];
     
         if ($search_term) {
@@ -38,6 +37,7 @@ class InventoryActions {
         $stmt->execute($params);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+    
     
 
 
@@ -76,9 +76,6 @@ class InventoryActions {
     //borrow
     public function borrowItem($item_id, $user_id, $quantity) {
         try {
-            // Begin a transaction
-            $this->conn->beginTransaction();
-    
             // Fetch the current quantity of the item
             $stmt = $this->conn->prepare("SELECT quantity FROM inventory_items WHERE item_id = ?");
             $stmt->execute([$item_id]);
@@ -89,8 +86,15 @@ class InventoryActions {
             }
     
             if ($item['quantity'] < $quantity) {
-                throw new Exception("Not enough quantity available.");
+                // Return an error message instead of proceeding
+                return [
+                    'success' => false,
+                    'message' => "Only {$item['quantity']} items are available. Cannot borrow the requested amount."
+                ];
             }
+    
+            // Begin a transaction
+            $this->conn->beginTransaction();
     
             // Decrease the quantity in the inventory
             $stmt = $this->conn->prepare("UPDATE inventory_items SET quantity = quantity - ? WHERE item_id = ?");
@@ -98,21 +102,28 @@ class InventoryActions {
     
             // Insert the borrow request
             $stmt = $this->conn->prepare("
-                INSERT INTO borrow_requests (user_id, item_id, quantity, borrow_date, return_date)
-                VALUES (?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 6 MONTH))
+                INSERT INTO borrow_requests (user_id, item_id, quantity, borrow_date, return_date, status)
+                VALUES (?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 6 MONTH), 'pending')
             ");
             $stmt->execute([$user_id, $item_id, $quantity]);
     
             // Commit the transaction
             $this->conn->commit();
-            return true;
+            return [
+                'success' => true,
+                'message' => "Item borrowed successfully!"
+            ];
         } catch (Exception $e) {
             // Rollback the transaction on failure
             $this->conn->rollBack();
             error_log($e->getMessage());
-            return false;
+            return [
+                'success' => false,
+                'message' => "An error occurred while borrowing the item."
+            ];
         }
     }
+    
     
     public function generateReport($startDate = null, $endDate = null) {
         $query = "SELECT br.request_id, br.user_id, br.item_id, br.quantity, br.borrow_date, br.return_date, br.status,
@@ -250,4 +261,5 @@ public function approveRequestManager($request_id) {
 
 }
 ?>
+
 

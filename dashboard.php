@@ -18,12 +18,16 @@ $role_actions = [
         'Search Item' => 'search_item.php',
         'Borrow Item' => 'borrow_item.php',
         'View Borrowing History' => 'view_borrowing_history.php',
+        'View Profile' => 'view_profile.php', // Add this
+
     ],
     'store_keeper' => [
         'Manage Items' => 'manage_items.php',
         'Search Item' => 'search_item.php',
         'Borrow Item' => 'borrow_item.php',
         'View Borrowing History' => 'view_borrowing_history.php',
+        'View Profile' => 'view_profile.php', // Add this
+
     ],
     'department_head' => [
         'Approve Borrow Requests' => 'approve_department_head.php',
@@ -31,11 +35,15 @@ $role_actions = [
         'Search Item' => 'search_item.php',
         'Borrow Item' => 'borrow_item.php',
         'View Borrowing History' => 'view_borrowing_history.php',
+        'View Profile' => 'view_profile.php', // Add this
+
     ],
     'inventory_employee' => [
         'Search Item' => 'search_item.php',
         'Borrow Item' => 'borrow_item.php',
         'View Borrowing History' => 'view_borrowing_history.php',
+        'View Profile' => 'view_profile.php', // Add this
+
     ],
 ];
 ?>

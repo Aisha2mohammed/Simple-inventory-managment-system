@@ -35,12 +35,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user_id = $_SESSION['user_id'];
     $result = $inventoryActions->borrowItem($item_id, $user_id, $quantity);
 
-    if ($result) {
-        echo "<script>alert('Item borrowed successfully!'); window.location.href='search_item.php';</script>";
+    if ($result['success']) {
+        echo "<script>alert('{$result['message']}'); window.location.href='search_item.php';</script>";
     } else {
-        echo "<script>alert('Failed to borrow the item. Check quantity or try again.'); window.location.href='borrow_item.php?item_id=$item_id';</script>";
+        echo "<script>alert('{$result['message']}'); window.location.href='borrow_item.php?item_id=$item_id';</script>";
     }
 }
+
 
 ?>
 <!-- HTML Code Below -->

@@ -125,4 +125,3 @@ $pendingRequests = $inventoryActions->getPendingRequests();
     </div>
 </body>
 </html>
-

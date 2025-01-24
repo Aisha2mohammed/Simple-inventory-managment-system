@@ -5,6 +5,11 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'store_keeper') {
     exit;
 }
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+
 require_once 'includes/db_connect.php';
 require_once 'Inventory.php';
 

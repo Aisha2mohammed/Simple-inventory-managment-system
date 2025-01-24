@@ -111,7 +111,7 @@ class InventoryActions {
             $this->conn->commit();
             return [
                 'success' => true,
-                'message' => "Item borrowed successfully!"
+                'message' => "Borrow request submitted successfully. It is pending approval."
             ];
         } catch (Exception $e) {
             // Rollback the transaction on failure
@@ -150,7 +150,7 @@ class InventoryActions {
      
     //  Approve a borrow request
      public function approveRequest($request_id) {
-        $stmt = $this->conn->prepare("UPDATE borrow_requests SET status = 'approved' WHERE request_id = ?");
+        $stmt = $this->conn->prepare("UPDATE borrow_requests SET status = 'approved',manager_approval = 'pending' WHERE request_id = ?");
         return $stmt->execute([$request_id]);
     }
     
@@ -261,5 +261,3 @@ public function approveRequestManager($request_id) {
 
 }
 ?>
-
-

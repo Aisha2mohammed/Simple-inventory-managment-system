@@ -29,7 +29,6 @@ if (!isset($_GET['item_id'])) {
 $item_id = $_GET['item_id'];
 $item = $inventoryActions->getItemById($item_id);
 
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $quantity = intval($_POST['quantity']);
     $user_id = $_SESSION['user_id'];
@@ -41,6 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo "<script>alert('{$result['message']}'); window.location.href='borrow_item.php?item_id=$item_id';</script>";
     }
 }
+
 
 
 ?>

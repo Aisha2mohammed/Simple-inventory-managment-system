@@ -76,7 +76,7 @@ class InventoryActions {
     //borrow
     public function borrowItem($item_id, $user_id, $quantity) {
         try {
-            // Fetch the current quantity of the item
+            // Check if the item exists and has enough quantity
             $stmt = $this->conn->prepare("SELECT quantity FROM inventory_items WHERE item_id = ?");
             $stmt->execute([$item_id]);
             $item = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -86,43 +86,32 @@ class InventoryActions {
             }
     
             if ($item['quantity'] < $quantity) {
-                // Return an error message instead of proceeding
                 return [
                     'success' => false,
                     'message' => "Only {$item['quantity']} items are available. Cannot borrow the requested amount."
                 ];
             }
     
-            // Begin a transaction
-            $this->conn->beginTransaction();
-    
-            // Decrease the quantity in the inventory
-            $stmt = $this->conn->prepare("UPDATE inventory_items SET quantity = quantity - ? WHERE item_id = ?");
-            $stmt->execute([$quantity, $item_id]);
-    
-            // Insert the borrow request
+            // Insert the borrow request with status 'pending'
             $stmt = $this->conn->prepare("
-                INSERT INTO borrow_requests (user_id, item_id, quantity, borrow_date, return_date, status)
-                VALUES (?, ?, ?, NOW(), DATE_ADD(NOW(), INTERVAL 6 MONTH), 'pending')
+                INSERT INTO borrow_requests (user_id, item_id, quantity, borrow_date, status, manager_approval)
+                VALUES (?, ?, ?, NOW(), 'pending', 'pending')
             ");
             $stmt->execute([$user_id, $item_id, $quantity]);
     
-            // Commit the transaction
-            $this->conn->commit();
             return [
                 'success' => true,
                 'message' => "Borrow request submitted successfully. It is pending approval."
             ];
         } catch (Exception $e) {
-            // Rollback the transaction on failure
-            $this->conn->rollBack();
-            error_log($e->getMessage());
+            error_log("Error borrowing item: " . $e->getMessage());
             return [
                 'success' => false,
-                'message' => "An error occurred while borrowing the item."
+                'message' => "An error occurred while submitting the borrow request."
             ];
         }
     }
+    
     
     
     public function generateReport($startDate = null, $endDate = null) {
@@ -150,8 +139,13 @@ class InventoryActions {
      
     //  Approve a borrow request
      public function approveRequest($request_id) {
-        $stmt = $this->conn->prepare("UPDATE borrow_requests SET status = 'approved',manager_approval = 'pending' WHERE request_id = ?");
-        return $stmt->execute([$request_id]);
+              try {
+            $stmt = $this->conn->prepare("UPDATE borrow_requests SET status = 'approved',manager_approval = 'pending' WHERE request_id = ?");
+            return $stmt->execute([$request_id]);
+        } catch (Exception $e) {
+            error_log("Error approving request by department head: " . $e->getMessage());
+            return false;
+        }
     }
     
 
@@ -169,6 +163,18 @@ public function rejectRequest($request_id) {
 }
 
 // Get all pending borrow requests
+// public function getPendingRequests() {
+//     $stmt = $this->conn->query("
+//         SELECT br.request_id, br.user_id, br.item_id, br.quantity, br.borrow_date, br.status, 
+//                i.material, i.category, i.subcategory
+//         FROM borrow_requests br
+//         JOIN inventory_items i ON br.item_id = i.item_id
+//         WHERE br.status = 'pending'
+//     ");
+//     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+// }
+
+
 public function getPendingRequests() {
     $stmt = $this->conn->query("
         SELECT br.request_id, br.user_id, br.item_id, br.quantity, br.borrow_date, br.status, 
@@ -225,12 +231,11 @@ public function getManagerPendingRequests() {
 }
 
 
-
 public function approveRequestManager($request_id) {
     try {
         $this->conn->beginTransaction();
-        
-        // Get request details
+
+        // Fetch the request details
         $stmt = $this->conn->prepare("SELECT item_id, quantity FROM borrow_requests WHERE request_id = ?");
         $stmt->execute([$request_id]);
         $request = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -239,22 +244,30 @@ public function approveRequestManager($request_id) {
             throw new Exception("Request not found.");
         }
 
-        // Reduce item quantity
-        $stmt = $this->conn->prepare("UPDATE inventory_items SET quantity = quantity - ? WHERE item_id = ?");
-        $stmt->execute([$request['quantity'], $request['item_id']]);
+        $item_id = $request['item_id'];
+        $quantity = $request['quantity'];
 
-        // Update request status
-        $stmt = $this->conn->prepare("UPDATE borrow_requests SET manager_approval = 'approved', status = 'approved' WHERE request_id = ?");
+        // Reduce the item quantity in inventory
+        $stmt = $this->conn->prepare("UPDATE inventory_items SET quantity = quantity - ? WHERE item_id = ?");
+        $stmt->execute([$quantity, $item_id]);
+
+        // Update the borrow request status
+        $stmt = $this->conn->prepare("
+            UPDATE borrow_requests 
+            SET status = 'approved', manager_approval = 'approved' 
+            WHERE request_id = ?
+        ");
         $stmt->execute([$request_id]);
 
         $this->conn->commit();
         return true;
     } catch (Exception $e) {
         $this->conn->rollBack();
-        error_log("Error approving request: " . $e->getMessage());
+        error_log("Error approving request by store manager: " . $e->getMessage());
         return false;
     }
 }
+
 
 
 

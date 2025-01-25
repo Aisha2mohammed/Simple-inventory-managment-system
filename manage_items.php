@@ -179,11 +179,13 @@ $items = $inventory->getAllItems();
                         <td><?= htmlspecialchars($item['quantity']) ?></td>
                         <td><?= htmlspecialchars($item['status']) ?></td>
                         <td>
-                            <form method="POST" style="display:inline;">
-                                <input type="hidden" name="action" value="update">
-                                <input type="hidden" name="item_id" value="<?= $item['item_id'] ?>">
-                                <button type="submit">Update</button>
-                            </form>
+                            
+                        <a href="update_item.php?item_id=<?= htmlspecialchars($item['item_id']) ?>" style="text-decoration: none;">
+    <button type="button">Update</button>
+</a>
+
+
+
                             <form method="POST" style="display:inline;">
                                 <input type="hidden" name="action" value="delete">
                                 <input type="hidden" name="item_id" value="<?= $item['item_id'] ?>">

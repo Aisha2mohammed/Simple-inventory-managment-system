@@ -5,8 +5,23 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'store_keeper') {
     exit;
 }
 
+
 require_once 'includes/db_connect.php';
 require_once 'Inventory.php';
+
+if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 900)) {
+    session_unset();
+    session_destroy();
+    header("Location: login.html");
+    exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time(); // Update last activity time
+
+// Ensure the user is a department head
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'store_keeper') {
+    header("Location: login.html");
+    exit;
+}
 
 $inventory = new Inventory($conn);
 $message = "";
@@ -71,7 +86,7 @@ $items = $inventory->getAllItems();
             width: 100%;
             margin: 20px 0;
         }
-        form input, form select, form button {
+        form input, form select, form button ,.form-button{
             width: 100%;
             padding: 10px;
             margin: 10px 0;
@@ -181,7 +196,7 @@ $items = $inventory->getAllItems();
                         <td>
                             
                         <a href="update_item.php?item_id=<?= htmlspecialchars($item['item_id']) ?>" style="text-decoration: none;">
-    <button type="button">Update</button>
+    <button type="button" class="form-button" style="background-color: #0000ff7a; color: white;">Update</button>
 </a>
 
 
@@ -189,7 +204,7 @@ $items = $inventory->getAllItems();
                             <form method="POST" style="display:inline;">
                                 <input type="hidden" name="action" value="delete">
                                 <input type="hidden" name="item_id" value="<?= $item['item_id'] ?>">
-                                <button type="submit" style="background-color: red; color: white;">Delete</button>
+                                <button type="submit" style="background-color: #ff00009c; color: white;">Delete</button>
                             </form>
                         </td>
                     </tr>

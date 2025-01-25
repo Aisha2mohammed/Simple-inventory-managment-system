@@ -1,14 +1,23 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'store_keeper') {
-    header("Location: login.html");
-    exit;
-}
+require_once 'includes/db_connect.php'; 
+require_once 'Security.php'; 
+
+session_start(); 
+$security = new Security($conn); 
+
+$security->enforceSessionTimeout(); 
+$security->checkAuthentication(); 
+$security->checkAuthorization('store_keeper'); 
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// Check user role and authentication
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'store_keeper') {
+    header("Location: login.html");
+    exit;
+}
 
 require_once 'includes/db_connect.php';
 require_once 'Inventory.php';
@@ -16,10 +25,10 @@ require_once 'Inventory.php';
 $inventory = new Inventory($conn);
 $message = "";
 
-// Fetch the item details for pre-filling the form
-$item_id = $_GET['item_id'] ?? null;
+// Fetch the item ID securely
+$item_id = filter_input(INPUT_GET, 'item_id', FILTER_SANITIZE_NUMBER_INT);
 if (!$item_id) {
-    die("Item ID not provided.");
+    die("Invalid or missing item ID.");
 }
 
 $item = $inventory->getItemById($item_id);
@@ -27,25 +36,35 @@ if (!$item) {
     die("Item not found.");
 }
 
+// Generate CSRF token for form submission
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $csrf_token = filter_input(INPUT_POST, 'csrf_token', FILTER_SANITIZE_STRING);
+    if (!$csrf_token || $csrf_token !== $_SESSION['csrf_token']) {
+        die("CSRF token validation failed.");
+    }
+
     $data = [
-        'item_id' => $_POST['item_id'],
-        'category' => $_POST['category'],
-        'subcategory' => $_POST['subcategory'],
-        'material' => $_POST['material'],
-        'condition' => $_POST['condition'],
-        'quantity' => $_POST['quantity'],
+        'item_id' => filter_input(INPUT_POST, 'item_id', FILTER_SANITIZE_NUMBER_INT),
+        'category' => filter_input(INPUT_POST, 'category', FILTER_SANITIZE_STRING),
+        'subcategory' => filter_input(INPUT_POST, 'subcategory', FILTER_SANITIZE_STRING),
+        'material' => filter_input(INPUT_POST, 'material', FILTER_SANITIZE_STRING),
+        'condition' => filter_input(INPUT_POST, 'condition', FILTER_SANITIZE_STRING),
+        'quantity' => filter_input(INPUT_POST, 'quantity', FILTER_SANITIZE_NUMBER_INT),
     ];
 
     if ($inventory->updateItem($data)) {
-        $message = "Item updated successfully!";
+        header("Location: manage_items.php?status=success");
+        exit;
     } else {
-        $message = "Failed to update item.";
+        $message = "Failed to update the item. Please try again.";
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -53,6 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Item</title>
     <style>
+        /* Styling */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f9;
@@ -102,6 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <?php endif; ?>
 
         <form method="POST">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
             <input type="hidden" name="item_id" value="<?= htmlspecialchars($item['item_id']) ?>">
 
             <label for="category">Category:</label>
@@ -154,24 +175,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         const subcategoryDropdown = document.getElementById("subcategory");
         const materialDropdown = document.getElementById("material");
 
-        function populateSubcategoryAndMaterial() {
+        function populateSubcategory() {
             const selectedCategory = categoryDropdown.value;
-            subcategoryDropdown.innerHTML = `<option value="" disabled>Select Subcategory</option>`;
+            subcategoryDropdown.innerHTML = '';
             (subcategoryMap[selectedCategory] || []).forEach(sub => {
                 subcategoryDropdown.innerHTML += `<option value="${sub}" ${sub === "<?= htmlspecialchars($item['subcategory']) ?>" ? "selected" : ""}>${sub}</option>`;
             });
+            populateMaterial();
+        }
+
+        function populateMaterial() {
             const selectedSubcategory = subcategoryDropdown.value || "<?= htmlspecialchars($item['subcategory']) ?>";
-            materialDropdown.innerHTML = `<option value="" disabled>Select Material</option>`;
+            materialDropdown.innerHTML = '';
             (materialMap[selectedSubcategory] || []).forEach(mat => {
                 materialDropdown.innerHTML += `<option value="${mat}" ${mat === "<?= htmlspecialchars($item['material']) ?>" ? "selected" : ""}>${mat}</option>`;
             });
         }
 
-        categoryDropdown.addEventListener("change", populateSubcategoryAndMaterial);
-        subcategoryDropdown.addEventListener("change", populateSubcategoryAndMaterial);
+        categoryDropdown.addEventListener("change", populateSubcategory);
+        subcategoryDropdown.addEventListener("change", populateMaterial);
 
         // Initial population
-        populateSubcategoryAndMaterial();
+        populateSubcategory();
     </script>
 </body>
 </html>

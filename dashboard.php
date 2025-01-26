@@ -1,9 +1,12 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.html");
-    exit;
-}
+require_once 'includes/db_connect.php'; 
+require_once 'Security.php'; 
+
+session_start(); 
+$security = new Security($conn); 
+
+$security->enforceSessionTimeout(); 
+$security->checkAuthentication(); 
 
 $name = htmlspecialchars($_SESSION['name']);
 $role = htmlspecialchars($_SESSION['role']);

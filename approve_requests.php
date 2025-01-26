@@ -1,26 +1,14 @@
 <?php
-session_start();
+require_once 'includes/db_connect.php'; 
+require_once 'Security.php'; 
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+session_start(); 
+$security = new Security($conn); 
 
-// Session Timeout
-if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 900)) {
-    session_unset();
-    session_destroy();
-    header("Location: login.html");
-    exit;
-}
-$_SESSION['LAST_ACTIVITY'] = time(); // Update last activity time
+$security->enforceSessionTimeout(); 
+$security->checkAuthentication(); 
+$security->checkAuthorization('store_manager'); 
 
-// Ensure user is authenticated and has the correct role
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'store_manager') {
-    header("Location: login.html");
-    exit;
-}
-
-require_once 'includes/db_connect.php';
 require_once 'InventoryActions.php';
 
 $inventoryActions = new InventoryActions($conn);

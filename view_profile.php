@@ -1,24 +1,11 @@
 <?php
-session_start();
+require_once 'Security.php'; 
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+session_start(); 
+$security = new Security($conn); 
 
-// Session Timeout Handling
-if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 900)) {
-    session_unset();
-    session_destroy();
-    header("Location: login.html");
-    exit;
-}
-$_SESSION['LAST_ACTIVITY'] = time(); // Update last activity time
-
-// Ensure User is Authenticated
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.html");
-    exit;
-}
+$security->enforceSessionTimeout(); 
+$security->checkAuthentication(); 
 
 require_once 'includes/db_connect.php';
 

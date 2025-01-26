@@ -1,22 +1,14 @@
 <?php
-session_start();
+require_once 'includes/db_connect.php'; 
+require_once 'Security.php'; 
 
-// Session Timeout
-if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 900)) {
-    session_unset();
-    session_destroy();
-    header("Location: login.html");
-    exit;
-}
-$_SESSION['LAST_ACTIVITY'] = time(); // Update last activity time
+session_start(); 
+$security = new Security($conn); 
 
-// Ensure the user is a department head
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'department_head') {
-    header("Location: login.html");
-    exit;
-}
+$security->enforceSessionTimeout(); 
+$security->checkAuthentication(); 
+$security->checkAuthorization('department_head');
 
-require_once 'includes/db_connect.php';
 require_once 'InventoryActions.php';
 
 $inventoryActions = new InventoryActions($conn);
@@ -36,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $pendingRequests = $inventoryActions->getPendingRequests();
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,6 +36,7 @@ $pendingRequests = $inventoryActions->getPendingRequests();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Approve Borrow Requests</title>
     <style>
+<style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f9;
@@ -87,7 +81,7 @@ $pendingRequests = $inventoryActions->getPendingRequests();
             background-color: #dc3545;
             color: white;
         }
-    </style>
+    </style>    </style>
 </head>
 <body>
     <div class="container">

@@ -1,9 +1,13 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header("Location: login.html");
-    exit;
-}
+require_once 'includes/db_connect.php'; 
+require_once 'Security.php'; 
+
+session_start(); 
+$security = new Security($conn); 
+
+$security->enforceSessionTimeout(); 
+$security->checkAuthentication(); 
+$security->checkAuthorization('admin'); 
 
 require_once 'User.php'; // Ensure the correct path
 require_once 'includes/db_connect.php'; // Ensure the correct path

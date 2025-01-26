@@ -15,11 +15,30 @@ require_once 'includes/db_connect.php'; // Ensure the correct path
 // Create an instance of the User class, passing the database connection
 $user = new User($conn);
 
+function validatePassword($password) {
+    // Check if the password meets the specified criteria
+    $pattern = "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/";
+    return preg_match($pattern, $password);
+}
+
 // Handle operations (add, update, delete) with PRG pattern
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'];
+    $password = $_POST['password'];
+
+
+        // Validate password
+        if (!validatePassword($password)) {
+            $_SESSION['message'] = "Password must be at least 8 characters long, contain both uppercase and lowercase letters, a number, and a special character.";
+            header("Location: manage_users.php");
+            exit;
+        }
+
+        
     if ($action === 'add') {
-        $user->addUser($_POST['name'], $_POST['email'], $_POST['password'], $_POST['role']);
+        // Hash the password before storing it
+        $hashedPassword = password_hash($_POST['password'], PASSWORD_BCRYPT);
+        $user->addUser($_POST['name'], $_POST['email'], $hashedPassword, $_POST['role']);
         $_SESSION['message'] = "User added successfully!";
     } elseif ($action === 'update') {
         $user->updateUser($_POST['user_id'], $_POST['name'], $_POST['email'], $_POST['role']);
@@ -67,7 +86,6 @@ $users = $user->getAllUsers();
             text-align: center;
             color: #333;
         }
-
 
         form {
             margin: 20px 0;

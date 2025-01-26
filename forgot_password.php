@@ -1,6 +1,11 @@
 <?php
-session_start();
+require_once 'Security.php'; 
 require_once 'includes/db_connect.php';
+
+session_start(); 
+$security = new Security($conn); 
+
+$security->enforceSessionTimeout(); 
 
 $message = "";
 
@@ -10,31 +15,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $new_password = $_POST['new_password'] ?? null;
     $confirm_password = $_POST['confirm_password'] ?? null;
 
-    try {
-        // Step 2: Check if the email exists in the database
-        $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    // Password validation
+    if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/', $new_password)) {
+        $message = "
+        <div class='message error'>
+            <ul>
+                <li>Password must be at least 8 characters long.</li>
+                <li>Contain uppercase and lowercase letters.</li>
+                <li>Contain a number.</li>
+                <li>Contain a special character (e.g., @$!%*?&).</li>
+            </ul>
+        </div>";
+    } else {
+        try {
+            // Step 2: Check if the email exists in the database
+            $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
+            $stmt->execute([$email]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-        if ($user) {
-            // Step 3: Check if the user has submitted new password fields
-            if ($new_password && $confirm_password) {
-                if ($new_password === $confirm_password) {
-                    // Update the password in the database
-                    $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
-                    $update_stmt = $conn->prepare("UPDATE users SET password = ? WHERE email = ?");
-                    $update_stmt->execute([$hashed_password, $email]);
+            if ($user) {
+                // Step 3: Check if the user has submitted new password fields
+                if ($new_password && $confirm_password) {
+                    if ($new_password === $confirm_password) {
+                        // Update the password in the database
+                        $hashed_password = password_hash($new_password, PASSWORD_DEFAULT);
 
-                    $message = "<div class='message success'>Password reset successfully! <a href='login.html'>Go to Login</a></div>";
-                } else {
-                    $message = "<div class='message error'>Error: Passwords do not match.</div>";
+                        // Reset the password
+                        $update_stmt = $conn->prepare("UPDATE users SET password = ? WHERE email = ?");
+                        $update_stmt->execute([$hashed_password, $email]);
+
+                        $message = "<div class='message success'>Password reset successfully! <a href='login.html'>Go to Login</a></div>";
+                    } else {
+                        $message = "<div class='message error'>Error: Passwords do not match.</div>";
+                    }
                 }
+            } else {
+                $message = "<div class='message error'>Error: Email not found.</div>";
             }
-        } else {
-            $message = "<div class='message error'>Error: Email not found.</div>";
+        } catch (PDOException $e) {
+            $message = "<div class='message error'>Error: " . htmlspecialchars($e->getMessage()) . "</div>";
         }
-    } catch (PDOException $e) {
-        $message = "<div class='message error'>Error: " . htmlspecialchars($e->getMessage()) . "</div>";
     }
 }
 ?>
@@ -74,16 +94,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             background-color: #0056b3;
         }
         .message {
-            margin-top: 10px;
+            margin: 10px 0;
             padding: 10px;
-            color: white;
+            color: #9d9c9c;
             border-radius: 5px;
         }
         .success {
             background-color: #28a745;
         }
         .error {
-            background-color: #dc3545;
+            background-color: #f4f4f9;
         }
     </style>
 </head>
@@ -96,14 +116,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <form method="POST">
             <label for="email">Enter your email:</label>
             <input type="email" id="email" name="email" required>
-            
-            <?php if (!empty($user)): ?>
-                <label for="new_password">New Password:</label>
-                <input type="password" id="new_password" name="new_password" required>
 
-                <label for="confirm_password">Confirm New Password:</label>
-                <input type="password" id="confirm_password" name="confirm_password" required>
-            <?php endif; ?>
+            <label for="new_password">New Password:</label>
+            <input type="password" id="new_password" name="new_password" required>
+
+            <label for="confirm_password">Confirm New Password:</label>
+            <input type="password" id="confirm_password" name="confirm_password" required>
 
             <button type="submit">Reset Password</button>
         </form>

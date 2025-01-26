@@ -1,55 +1,49 @@
-
-
 <?php
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'store_keeper') {
-    header("Location: login.html");
-    exit;
-}
-
-
-require_once 'includes/db_connect.php';
+require_once 'includes/db_connect.php'; 
 require_once 'Inventory.php';
+require_once 'Security.php'; 
 
-if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 900)) {
-    session_unset();
-    session_destroy();
-    header("Location: login.html");
-    exit;
-}
-$_SESSION['LAST_ACTIVITY'] = time(); // Update last activity time
+session_start(); 
+$security = new Security($conn); 
 
-// Ensure the user is a department head
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'store_keeper') {
-    header("Location: login.html");
-    exit;
-}
+$security->enforceSessionTimeout(); 
+$security->checkAuthentication(); 
+$security->checkAuthorization('department_head');
+
 
 $inventory = new Inventory($conn);
 $message = "";
+$itemExistsMessage = "";
 
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'];
 
     if ($action === 'add') {
-        $data = [
-            'item_id' => $_POST['item_id'],
-            'category' => $_POST['category'],
-            'subcategory' => $_POST['subcategory'],
-            'material' => $_POST['material'],
-            'condition' => $_POST['condition'],
-            'quantity' => $_POST['quantity'],
-            'status' => $_POST['status'],
-        ];
-        if ($inventory->addItem($data)) {
-            $message = "Item added successfully!";
+        $itemId = $_POST['item_id'];
+        
+        // Check if the item ID already exists in the inventory
+        $existingItem = $inventory->getItemById($itemId);
+        if ($existingItem) {
+            $itemExistsMessage = "Item with ID $itemId already exists.";
         } else {
-            $message = "Failed to add item.";
+            $data = [
+                'item_id' => $_POST['item_id'],
+                'category' => $_POST['category'],
+                'subcategory' => $_POST['subcategory'],
+                'material' => $_POST['material'],
+                'condition' => $_POST['condition'],
+                'quantity' => $_POST['quantity'],
+                'status' => $_POST['status'],
+            ];
+            if ($inventory->addItem($data)) {
+                $message = "Item added successfully!";
+            } else {
+                $message = "Failed to add item.";
+            }
         }
     } elseif ($action === 'delete') {
         if ($inventory->deleteItem($_POST['item_id'])) {
@@ -70,6 +64,7 @@ $items = $inventory->getAllItems();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manage Items</title>
     <style>
+        /* Existing styling */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f9;
@@ -126,11 +121,23 @@ $items = $inventory->getAllItems();
             border: 1px solid #c3e6cb;
             border-radius: 5px;
         }
+        .error-message {
+            padding: 10px;
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Manage Items</h1>
+
+        <!-- Notification for item existence -->
+        <?php if ($itemExistsMessage): ?>
+            <div class="error-message"><?= $itemExistsMessage ?></div>
+        <?php endif; ?>
 
         <!-- Add Item Form -->
         <h2>Add/Update Item</h2>
@@ -200,12 +207,9 @@ $items = $inventory->getAllItems();
                         <td><?= htmlspecialchars($item['quantity']) ?></td>
                         <td><?= htmlspecialchars($item['status']) ?></td>
                         <td>
-                            
-                        <a href="update_item.php?item_id=<?= htmlspecialchars($item['item_id']) ?>" style="text-decoration: none;">
-    <button type="button" class="form-button" style="background-color: #0000ff7a; color: white;">Update</button>
-</a>
-
-
+                            <a href="update_item.php?item_id=<?= htmlspecialchars($item['item_id']) ?>" style="text-decoration: none;">
+                                <button type="button" class="form-button" style="background-color: #0000ff7a; color: white;">Update</button>
+                            </a>
 
                             <form method="POST" style="display:inline;">
                                 <input type="hidden" name="action" value="delete">
@@ -220,6 +224,7 @@ $items = $inventory->getAllItems();
     </div>
 
     <script>
+        // Existing JavaScript for dynamic options
         const subcategoryMap = {
             "renewable": ["Furniture", "Electronics", "Solar Panels", "Wind Turbines"],
             "non-renewable": ["Metals", "Chemicals", "Plastics", "Fossil Fuels"]

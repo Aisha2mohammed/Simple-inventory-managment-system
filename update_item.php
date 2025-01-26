@@ -1,6 +1,7 @@
 <?php
 require_once 'includes/db_connect.php'; 
 require_once 'Security.php'; 
+require_once 'Inventory.php';
 
 session_start(); 
 $security = new Security($conn); 
@@ -14,13 +15,8 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 // Check user role and authentication
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'store_keeper') {
-    header("Location: login.html");
-    exit;
-}
 
-require_once 'includes/db_connect.php';
-require_once 'Inventory.php';
+
 
 $inventory = new Inventory($conn);
 $message = "";

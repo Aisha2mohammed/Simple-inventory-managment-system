@@ -1,9 +1,13 @@
 <?php
-session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header("Location: login.html");
-    exit;
-}
+require_once 'Security.php'; 
+
+session_start(); 
+$security = new Security($conn); 
+
+$security->enforceSessionTimeout(); 
+$security->checkAuthentication(); 
+$security->checkAuthorization('admin'); 
+
 
 require_once 'User.php';
 require_once 'includes/db_connect.php';
@@ -133,6 +137,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_user'])) {
     </div>
 </body>
 </html>
-
-
-

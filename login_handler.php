@@ -1,13 +1,13 @@
 <?php
-session_start();
 require_once 'includes/db_connect.php';
-// require_once 'Security.php';
+
+
+session_start();
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-// $security = new Security($conn);
-// $security->redirectAfterLogin();
+
 
 // Rate Limiting: Define helper functions
 function getLoginAttempts($ip) {

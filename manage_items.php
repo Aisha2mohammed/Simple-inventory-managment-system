@@ -11,7 +11,7 @@ $security = new Security($conn);
 
 $security->enforceSessionTimeout(); 
 $security->checkAuthentication(); 
-$security->checkAuthorization('department_head');
+$security->checkAuthorization('store_keeper');
 
 
 $inventory = new Inventory($conn);

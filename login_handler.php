@@ -1,13 +1,38 @@
+
+
+
+
 <?php
-require_once 'includes/db_connect.php';
-
-
 session_start();
+require_once 'includes/db_connect.php';
+$stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
+$stmt->execute([$email]);
+$user = $stmt->fetch(PDO::FETCH_ASSOC);
+error_log("User fetched: " . print_r($user, true));
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
+//
 
+if (strlen($email) > 255 || strlen($password) > 100) {
+    die('Invalid input length');
+}
+
+
+$name = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+
+if (strlen($name) > 20) {
+    die('Username too long');
+}
+
+
+// if ($user && password_verify($password, $user['password'])) {
+//     // Escape the username for safe output
+//     $safeUsername = htmlspecialchars($user['username'], ENT_QUOTES, 'UTF-8');
+//     echo "Welcome, $safeUsername!";
+// } else {
+//     die('Invalid email or password');
+// }
+
+//
 
 // Rate Limiting: Define helper functions
 function getLoginAttempts($ip) {
@@ -29,6 +54,19 @@ if (getLoginAttempts($ip_address) >= 5) {
     echo "<script>alert('Too many login attempts. Please try again later.'); window.location.href='login.html';</script>";
     exit;
 }
+
+
+function redirectAfterLogin() {
+    if (isset($_SESSION['redirect_url'])) {
+        $redirect_url = $_SESSION['redirect_url'];
+        unset($_SESSION['redirect_url']);
+        header("Location: $redirect_url");
+    } else {
+        header("Location: dashboard.php");
+    }
+    exit;
+}
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim($_POST['email']);
@@ -53,8 +91,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['role'] = $user['role'];
             $_SESSION['name'] = $user['name'];
 
-            // Redirect to the universal dashboard
-            header("Location: dashboard.php");
+            // Check if the user tried to access a restricted page before login
+            if (isset($_SESSION['redirect_url'])) {
+                header("Location: " . $_SESSION['redirect_url']);
+                unset($_SESSION['redirect_url']); // Clear the redirect URL after use
+            } else {
+                // Default redirect to the dashboard if no specific page was requested
+                header("Location: dashboard.php");
+            }
             exit;
         } else {
             // Log failed login attempt

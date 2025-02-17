@@ -1,18 +1,23 @@
 
 <?php
+session_start();
 
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-srequire_once 'Security.php'; 
+if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 900)) {
+    session_unset();
+    session_destroy();
+    header("Location: login.html");
+    exit;
+}
+$_SESSION['LAST_ACTIVITY'] = time();
 
-session_start(); 
-$security = new Security($conn); 
-
-$security->enforceSessionTimeout(); 
-$security->checkAuthentication(); 
-$security->checkAuthorization('department_head'); 
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'department_head') {
+    header("Location: login.html");
+    exit;
+}
 
 require_once 'includes/db_connect.php';
 require_once 'InventoryActions.php';

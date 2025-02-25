@@ -1,20 +1,13 @@
 <?php
-session_start();
+require_once 'includes/db_connect.php'; 
+require_once 'Security.php'; 
 
-// Session Timeout
-if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY'] > 900)) {
-    session_unset();
-    session_destroy();
-    header("Location: login.html");
-    exit;
-}
-$_SESSION['LAST_ACTIVITY'] = time(); // Update last activity time
+session_start(); 
+$security = new Security($conn); 
 
-// Ensure user is authenticated
-if (!isset($_SESSION['user_id'])) {
-    header("Location: login.html");
-    exit;
-}
+$security->enforceSessionTimeout(); 
+$security->checkAuthentication(); 
+
 
 require_once 'includes/db_connect.php';
 require_once 'InventoryActions.php';

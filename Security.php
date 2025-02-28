@@ -94,49 +94,8 @@ class Security {
         $_SESSION['page_token'] = bin2hex(random_bytes(16));
     }
     
-
-// class PageToken {
-    // The session key for storing the token
-    // private $sessionKey = 'page_token';
-
-    // // Constructor to start the session
-    // public function __construct() {
-    //     if (session_status() == PHP_SESSION_NONE) {
-    //         session_start();
-    //     }
-    //     $this->generateToken();
-    // }
-
-    // // Generate a new token if one doesn't exist in the session
-    // public function generateToken() {
-    //     if (empty($_SESSION[$this->sessionKey])) {
-    //         $_SESSION[$this->sessionKey] = bin2hex(random_bytes(32)); // Generate a random token
-    //     }
-    // }
-
-    // // Get the token from the session
-    // public function getToken() {
-    //     return $_SESSION[$this->sessionKey];
-    // }
-
-    // // Validate the submitted token
-    // public function validateToken($submittedToken) {
-    //     if ($submittedToken !== $_SESSION[$this->sessionKey]) {
-    //         die('Invalid form submission');
-    //     }
-    //     $this->clearToken(); // Clear the token after validation
-    // }
-
-    // // Clear the token after it's used or for security reasons
-    // public function clearToken() {
-    //     unset($_SESSION[$this->sessionKey]);
-    // }
-// }
-
-
 }
 ?>
-
     
     
 

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+
+
+    <title>inventory</title>
+   
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+               <i> <a href="#home">Home</a>
+               <i> <a href="#About">About</a>
+               <i> <a href="#Contact">Contact</a>
+               <i> <a href="login.html">Login</a>
+            </ul>
+           
+        </nav>
+    </header>
+
+    <section id="home" class="hero">
+     <h2>Welcome to Dire Dawa </h2>
+     <h2>Inventory Management System</h2>
+    </section>
+
+
+    <section id="About" >
+        <div class="container">
+            <h2>About Us</h2>
+            <div class="about-section">
+                <div class="about-content">
+                   <p> Our Inventory Management System (IMS) centralizes and automates inventory tracking and management 
+                    at Dire Dawa University. With real-time updates, user access control, and automatic report generation,
+                     it addresses resource mismanagement and inefficiencies. The user-friendly interface enhances operational 
+                     efficiency, reduces waste, and ensures resources support academic and administrative activities. 
+                     The IMS also boosts transparency and accountability in resource use, aiding the university's long-term goals. </p>
+                     <p> We support six key roles: Admins handle employee registration and governance; Store Managers manage inventory,
+                        logistics, and reporting; Store Keepers handle daily storage operations, inventory updates, and borrowing history; 
+                        Department Heads lead academically, authorize employees, and manage borrowing; University Employees search items,
+                         manage profiles, and track borrowing history; Maintenance Technicians ensure facilities are in top condition.</p>
+             </div>
+            </div>
+        </div>
+
+    </section>
+  <section id="Contact">
+    
+    <div class="container">
+    <h2>Contact Us</h2>
+
+<div class="contact-container">
+  <div class="contact-links">
+    <li><a href="tel:+1234567890"><i class="fas fa-phone"></i>call us</a> </li>
+    <li><a href="mailto:example@example.com"> <i class="fas fa-envelope"></i>email us </a></li>
+    <li><a href="https://www.instagram.com/DDU" target="_blank"> <i class="fab fa-instagram"></i>Follow us</a>
+      <li><i class="fa-solid fa-location-dot"></i> location: Dire dawa,DDU ,near mermersa gate </li>
+
+  </div>
+
+  <div class="contact-form">
+    <h2>Send a Message</h2>
+    <form action="#" method="POST">
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required>
+
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required>
+
+      <label for="message">Message:</label>
+      <textarea id="message" name="message" rows="4" required></textarea>
+
+      <button type="submit" style="font-size: 30px;"onmouseover="addMotion(this)" onmouseout="removeMotion(this)">Send Message</button>
+    </form>
+  </div>
+</div>
+</div>
+  </section>
+    <footer>
+        <p>&copy; 2025 Inventory managment. All rights reserved.</p>
+    </footer>
+  
+</body>

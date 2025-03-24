@@ -113,7 +113,7 @@ class InventoryActions {
     }
     
     
-    
+    // generate a report
     public function generateReport($startDate = null, $endDate = null) {
         $query = "SELECT br.request_id, br.user_id, br.item_id, br.quantity, br.borrow_date, br.return_date, br.status,
                   i.category, i.subcategory, i.material
@@ -161,19 +161,6 @@ public function rejectRequest($request_id) {
         return false;
     }
 }
-
-// Get all pending borrow requests
-// public function getPendingRequests() {
-//     $stmt = $this->conn->query("
-//         SELECT br.request_id, br.user_id, br.item_id, br.quantity, br.borrow_date, br.status, 
-//                i.material, i.category, i.subcategory
-//         FROM borrow_requests br
-//         JOIN inventory_items i ON br.item_id = i.item_id
-//         WHERE br.status = 'pending'
-//     ");
-//     return $stmt->fetchAll(PDO::FETCH_ASSOC);
-// }
-
 
 public function getPendingRequests() {
     $stmt = $this->conn->query("

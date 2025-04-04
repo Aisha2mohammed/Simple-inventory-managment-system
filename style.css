@@ -132,11 +132,11 @@ nav ul a:hover {
   border: 1px solid #181616;
   border-radius: 5px;
   box-shadow: 4px 4px 7px rgba(1, 1, 1, 1);
-  margin: 20px; /* Add spacing around the form */
-  max-width: 500px; /* Set a maximum width for the form */
+  margin: 20px; 
+  
+  max-width: 500px; 
   height: 600px;
-  width: 100%; /* Ensure the form fills the available space */
-}
+  width: 100%; 
 
 .contact-form h2 {
   font-size: 3em;

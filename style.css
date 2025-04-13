@@ -105,12 +105,10 @@ nav ul a:hover {
 }
 
 .contact-links div {
-  display: flex; /* Use Flexbox to align items horizontally */
-  align-items: center; /* Vertically align the image and text */
-  margin-bottom: 15px; /* Add spacing between items */
-  /*text-decoration: none; /* Remove underline for links */
-  color: #3b1e84; /* Text color */
-}
+  display: flex; 
+  align-items: center; 
+  margin-bottom: 15px; 
+  color: #3b1e84;
 .contact-links li {
   margin: 20px 0;
   font-size: 30px;
